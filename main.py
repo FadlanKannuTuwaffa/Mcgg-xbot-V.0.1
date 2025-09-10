@@ -5,7 +5,7 @@ from kivy.uix.boxlayout import BoxLayout
 
 from mcgg_core import montecarlo_predict
 
-KV = 
+KV = '''
 BoxLayout:
     orientation: 'vertical'
     padding: 12
@@ -34,7 +34,7 @@ BoxLayout:
             size_hint_y: None
             height: self.texture_size[1]
             text_size: self.width, None
-
+'''
 
 class MCGGApp(App):
     def build(self):
