@@ -3,5 +3,7 @@ bin/
 *.apk
 *.p12
 *.keystore
+*.jks
+keystore.txt
 *.pyc
 __pycache__/
