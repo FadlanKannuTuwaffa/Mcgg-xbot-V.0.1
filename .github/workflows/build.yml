@@ -1,4 +1,4 @@
-name: Build APK (Buildozer OCR Offline)
+name: Build Signed APK (MCGG-Xbot)
 
 on:
   push:
@@ -21,20 +21,29 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git ccache libffi-dev libssl-dev             libsqlite3-dev libjpeg-dev libpng-dev zlib1g-dev openjdk-11-jdk unzip python3-dev             libsndfile1 libopenblas-dev
+          sudo apt-get install -y build-essential git ccache libffi-dev libssl-dev \
+            libsqlite3-dev libjpeg-dev libpng-dev zlib1g-dev openjdk-17-jdk unzip python3-dev \
+            libsndfile1 libopenblas-dev
 
-      - name: Install buildozer and heavy deps (may take long)
+      - name: Install buildozer and deps
         run: |
           pip install --upgrade pip
           pip install buildozer==1.5.0 cython==0.29.36
           pip install torch==1.13.1+cpu torchvision==0.14.1+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
           pip install easyocr pillow
 
-      - name: Build (debug)
-        run: buildozer -v android debug
+      - name: Decode keystore from secrets
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > mcgg-release-key.jks
+
+      - name: Build (release)
+        run: buildozer -v android release
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
+        with:
+          name: signed-apk
+          path: bin/*.apk        uses: actions/upload-artifact@v4
         with:
           name: apk
           path: bin/*.apk
