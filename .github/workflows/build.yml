@@ -33,7 +33,46 @@ jobs:
           export ANDROID_SDK_ROOT=$HOME/android-sdk
           export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
 
-          yes | sdkmanager --licenses
+          yes | sdkmanager --licenses || true
+          sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
+
+      - name: Install buildozer and dependencies
+        run: |
+          pip install --upgrade pip
+          pip install buildozer==1.5.0 cython==0.29.36
+          pip install torch==1.13.1+cpu torchvision==0.14.1+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          pip install easyocr pillow
+
+      - name: Decode keystore from secrets
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > mcgg-release-key.jks
+          ls -l mcgg-release-key.jks
+
+      - name: Debug: Show current directory and files
+        run: |
+          pwd
+          ls -lah
+          ls -lah .buildozer
+          ls -lah .buildozer/android
+          ls -lah .buildozer/android/platform
+
+      - name: Clean previous builds
+        run: buildozer android clean
+
+      - name: Build (release APK)
+        env:
+          ANDROID_SDK_ROOT: $HOME/android-sdk
+          PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$PATH
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: buildozer -v android release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-apk
+          path: bin/*.apk
           sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
       - name: Install buildozer and dependencies
