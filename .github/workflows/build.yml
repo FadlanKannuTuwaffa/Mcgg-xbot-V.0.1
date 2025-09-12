@@ -2,7 +2,7 @@ name: Build Signed APK (MCGG-Xbot)
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -23,8 +23,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential git ccache libffi-dev libssl-dev \
             libsqlite3-dev libjpeg-dev libpng-dev zlib1g-dev openjdk-17-jdk unzip python3-dev \
-            libsndfile1 libopenblas-dev wget gettext autopoint
+            libsndfile1 libopenblas-dev wget
 
+          # Install Android SDK (commandline-tools)
           wget https://dl.google.com/android/repository/commandlinetools-linux-9123335_latest.zip -O cmdline-tools.zip
           mkdir -p $HOME/android-sdk/cmdline-tools
           unzip -q cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools
@@ -36,7 +37,7 @@ jobs:
           yes | sdkmanager --licenses
           sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
-      - name: Install buildozer and dependencies
+      - name: Install buildozer and deps
         run: |
           pip install --upgrade pip
           pip install buildozer==1.5.0 cython==0.29.36
@@ -46,18 +47,11 @@ jobs:
       - name: Decode keystore from secrets
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > mcgg-release-key.jks
-          ls -l mcgg-release-key.jks
 
-      - name: Clean previous builds
-        run: buildozer android clean
-
-      - name: Build (release APK)
+      - name: Build (release)
         env:
-          ANDROID_SDK_ROOT: $HOME/android-sdk
-          PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$PATH
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          ANDROID_SDK_ROOT: ${{ github.workspace }}/../android-sdk
+          PATH: ${{ github.workspace }}/../android-sdk/cmdline-tools/latest/bin:${{ github.workspace }}/../android-sdk/platform-tools:$PATH
         run: buildozer -v android release
 
       - name: Upload APK artifact
@@ -65,68 +59,12 @@ jobs:
         with:
           name: signed-apk
           path: bin/*.apk
-          sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
-
-      - name: Install buildozer and dependencies
-        run: |
-          pip install --upgrade pip
-          pip install buildozer==1.5.0 cython==0.29.36
-          pip install torch==1.13.1+cpu torchvision==0.14.1+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
-          pip install easyocr pillow
-
-      - name: Decode keystore from secrets
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > mcgg-release-key.jks
-          ls -l mcgg-release-key.jks
-
-      - name: Debug: Show current directory and files
-        run: |
-          pwd
-          ls -lah
-          ls -lah .buildozer
-          ls -lah .buildozer/android
-          ls -lah .buildozer/android/platform
-
-      - name: Clean previous builds
-        run: buildozer android clean
-
-      - name: Build (release APK)
-        env:
-          ANDROID_SDK_ROOT: $HOME/android-sdk
-          PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$PATH
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      - name: Build (release)
         run: buildozer -v android release
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: signed-apk
-          path: bin/*.apk
-          sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
-
-      - name: Install buildozer and dependencies
-        run: |
-          pip install --upgrade pip
-          pip install buildozer==1.5.0 cython==0.29.36
-          pip install torch==1.13.1+cpu torchvision==0.14.1+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
-          pip install easyocr pillow
-
-      - name: Decode keystore from secrets
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > mcgg-release-key.jks
-
-      - name: Build (release APK)
         env:
-          ANDROID_SDK_ROOT: $HOME/android-sdk
-          PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$PATH
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          buildozer android clean
-          buildozer -v android release
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
