@@ -1,49 +1,50 @@
 [app]
-# Nama package unik (jangan pakai spasi atau karakter aneh)
-package.name = mcgg_xbot
-package.domain = org.mcggxbot
 
-# Nama aplikasi yang akan tampil di HP
+# Nama aplikasi
 title = MCGG-Xbot_V.0.1
+package.name = mcgg_xbot
+package.domain = org.mcgg.xbot
 
 # Versi aplikasi
 version = 0.1
 
-# File utama (entry point Python)
+# Source code utama
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 
-# File python utama (sesuaikan dengan nama file kamu, misal main.py)
-main.py = main.py
+# Ikon app (opsional bisa ganti file)
+icon.filename = %(source.dir)s/data/icon.png
 
-# Ikon aplikasi
-icon.filename = %(source.dir)s/assets/icon.png
-
-# Orientation (all, landscape, portrait)
+# Orientasi layar (portrait atau landscape)
 orientation = portrait
 
-# Permissions (contoh kalau butuh kamera/ocr/storage)
-android.permissions = CAMERA, INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
+# Masukkan permission Android yang dibutuhkan OCR & AI
+android.permissions = INTERNET,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,CAMERA
 
-# Minimum Android API (21 = Android 5.0 Lollipop)
+# Nama file saat di-build
+android.archs = arm64-v8a, armeabi-v7a
+
+# Keystore untuk signed APK
+android.release_keystore = mcgg-release-key.jks
+android.release_keystore_pass = xbot234
+android.release_keyalias = mcgg-xbot-key
+android.release_keyalias_pass = xbot234
+
+# Minimum & target SDK
 android.minapi = 21
-
-# Target Android API (disarankan 33 untuk Android 13)
-android.api = 33
-
-# SDK versi terbaru
 android.sdk = 33
 android.ndk = 25b
-android.ndk_api = 21
 
-# Nama file keystore
-android.release_keystore = mcgg-release-key.jks
-android.release_keyalias = mcgg-xbot-key
+# Extra requirements (OCR, Torch, dll.)
+requirements = python3, kivy, pillow, easyocr, torch, torchvision
 
-# Password keystore (gunakan secrets di GitHub, jangan hardcode di sini!)
-# biarkan kosong, nanti buildozer pakai environment
-# android.release_keystore_pass = 
-# android.release_keyalias_pass = 
+# Entry point
+entrypoint = main.py
 
-# Package mode
+# (Opsional) Fullscreen
 fullscreen = 0
+
+[buildozer]
+
+log_level = 2
+warn_on_root = 1
