@@ -20,7 +20,7 @@ main.py = main.py
 icon.filename = %(source.dir)s/assets/icon.png
 
 # Orientation (all, landscape, portrait)
-orientation = sensor
+orientation = portrait
 
 # Permissions (contoh kalau butuh kamera/ocr/storage)
 android.permissions = CAMERA, INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
